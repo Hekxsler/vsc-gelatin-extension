@@ -3,3 +3,5 @@ define nows /\S*/
 grammar input:
     match nows:
         do.return()
+    match ws nows:
+        asdfklj
