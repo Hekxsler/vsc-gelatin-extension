@@ -1,0 +1,25 @@
+{
+  "name": "gelatin",
+  "displayName": "Gelatin",
+  "description": "Gelatin syntax highlighting and linting",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "gelatin",
+      "aliases": ["Gelatin", "gelatin"],
+      "extensions": [".gel"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "gelatin",
+      "scopeName": "source.gel",
+      "path": "./syntaxes/gelatin.tmLanguage.json"
+    }]
+  }
+}
