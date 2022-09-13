@@ -1,0 +1,200 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Gelatin",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#functions"
+		},
+		{
+			"include": "#language"
+		},
+		{
+			"include": "#input"
+		},
+		{
+			"include": "#xmlattribute"
+		},
+		{
+			"include": "#matchvar"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#doublestrings"
+		},
+		{
+			"include": "#parentheses"
+		},
+		{
+			"include": "#regex"
+		},
+		{
+			"include": "#grammar"
+		},
+		{
+			"include": "#match"
+		},
+		{
+			"include": "#define"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.gelatin",
+					"match": "\\b(imatch|match|when|skip )\\b"
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "entity.name.type.gelatin",
+					"match": "\\b(grammar )\\b"
+				}
+			]
+		},
+		"functions": {
+			"patterns": [
+				{
+					"name": "entity.name.function.gelatin",
+					"match": "\\.\\w+"
+				}
+			]
+		},
+		"language": {
+			"patterns": [
+				{
+					"name": "variable.language.gelatin",
+					"match": "\\b(out|do|define )\\b"
+				}
+			]
+		},
+		"input": {
+			"patterns": [
+				{
+					"name": "entity.other.inherited-class.gelatin",
+					"match": "input"
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "variable.parameter.gelatin",
+					"match": "\\b[a-z0-9_]+\\b"
+				}
+			]
+		},
+		"xmlattribute":{
+			"patterns": [
+				{
+					"name": "entity.other.attribute-name.xmlattribute",
+					"match": "[?&][a-z]+="
+				}
+			]
+		},
+		"matchvar":{
+			"patterns": [
+				{
+					"name": "variable.other.matchvar",
+					"match": "$\\d+"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.single.gelatin",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"include": "#matchvar"
+				},
+				{
+					"include": "#xmlattribute"
+				}
+			]
+		},
+		"doublestrings": {
+			"name": "string.quoted.double.gelatin",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"include": "#matchvar"
+				}
+			]
+		},
+		"parentheses": {
+			"begin": "\\(",
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#strings"
+				}
+			]
+		},
+		"regex": {
+			"name": "string.regexp.gelatin",
+			"begin": "/",
+			"end": "/",
+			"patterns": [
+				{
+					"name": "constant.character.escape.gelatin",
+					"match": "\\\\."
+				}
+			]
+		},
+		"grammar": {
+			"name": "meta.class.gelatin",
+			"begin": "grammar",
+			"end": "\n",
+			"patterns": [
+				{
+					"include": "#parentheses"
+				}
+			]
+		},
+		"match": {
+			"name": "meta.function.gelatin",
+			"begin": "\\b(imatch|match|when|skip )\\b",
+			"end": "\n",
+			"patterns": [
+				{
+					"include": "#keywords"
+				},
+				{
+					"include": "#variables"
+				},
+				{
+					"include": "#regex"
+				}
+			]
+		},
+		"define": {
+			"name": "meta.variable.gelatin",
+			"begin": "define",
+			"end": "\n",
+			"patterns": [
+				{
+					"include": "#language"
+				},
+				{
+					"include": "#variables"
+				},
+				{
+					"include": "#regex"
+				}
+			]
+		}
+	},
+	"scopeName": "source.gel"
+}
