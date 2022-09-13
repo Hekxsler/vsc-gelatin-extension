@@ -8,11 +8,11 @@ function activate(ctx) {
     if (vscode.window.activeTextEditor) {
         updateDiagnostics(vscode.window.activeTextEditor.document, collection);
     }
-    ctx.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+    const listener = vscode.window.onDidChangeActiveTextEditor(editor => {
         if (editor) {
             updateDiagnostics(editor.document, collection);
         }
-    }));
+    });
     const provider = vscode.languages.registerCompletionItemProvider('gelatin', {
         provideCompletionItems(document, position) {
             const linePrefix = document.lineAt(position).text.substr(0, position.character);
@@ -44,47 +44,98 @@ function activate(ctx) {
         }
     }, '.' // triggered whenever a '.' is being typed
     );
-    ctx.subscriptions.push(collection, provider);
+    ctx.subscriptions.push(collection, provider, listener);
 }
 exports.activate = activate;
-function createDiagError(document, collection, message, range) {
-    collection.set(document.uri, [{
-            code: '',
-            message: message,
-            range: range,
-            severity: vscode.DiagnosticSeverity.Error,
-            source: '',
-            relatedInformation: []
-        }]);
+function createDiagError(message, range) {
+    return {
+        message: message,
+        range: range,
+        severity: vscode.DiagnosticSeverity.Error,
+    };
 }
-function getRange(y, x1, x2, y2) {
-    return new vscode.Range(new vscode.Position(y, x1), new vscode.Position(((y2) ? y2 : y), x2));
+function getRange(y, line, string) {
+    return new vscode.Range(new vscode.Position(y, line.indexOf(string)), new vscode.Position(y, line.lastIndexOf(string)));
 }
 function updateDiagnostics(document, collection) {
+    collection.clear();
     if (document.fileName.endsWith('.gel')) {
+        let errors = [];
         let variables = [];
+        let grammars = [];
+        let indent = 0;
         for (let x = 0; x < document.lineCount - 1; x++) {
             let line = document.lineAt(x).text;
+            //test define line
             if (line.startsWith("define")) {
                 var define = line.replace("define ", "").split(" ");
-                let varname = define[0];
+                let name = define[0];
                 let regex = define[1];
-                if (varname.match(new RegExp('[a-z0-9_]+'))) {
-                    if () {
+                if (name.match(new RegExp('[a-z0-9_]+'))) {
+                    try {
+                        variables.push(name);
                     }
-                    else {
-                        createDiagError(document, collection, 'Invalid regular expression', getRange(x, line.indexOf(regex), line.lastIndexOf(regex)));
+                    catch {
+                        errors.push(createDiagError('Invalid regular expression: ' + regex, getRange(x, line, regex)));
                     }
                 }
                 else {
-                    createDiagError(document, collection, 'Invalid variable name', getRange(x, 7, 7 + varname.length));
+                    errors.push(createDiagError('Invalid variable name: "' + name + '"', getRange(x, line, name)));
                 }
+                continue;
             }
-            createDiagError(document, collection, 'Invalid statement', getRange(x, 0, line.length - 1));
+            //test grammar line
+            if (line.startsWith("grammar")) {
+                var grammar = line.replace("grammar ", "").slice(0, -1).split("(");
+                let name = grammar[0];
+                if (grammar.length > 1) {
+                    let parent = grammar[1].slice(0, -1);
+                    if (parent && grammars.includes(parent)) {
+                        errors.push(createDiagError('Inherited grammar "' + parent + '" not defined', getRange(x, line, parent)));
+                    }
+                }
+                if (name.match(new RegExp('[a-z0-9_]+'))) {
+                    grammars.push(name);
+                }
+                else {
+                    errors.push(createDiagError('Invalid grammar name: "' + name + '"', getRange(x, line, name)));
+                }
+                continue;
+            }
+            let trimmed = line.trimStart();
+            if (line == trimmed) {
+                continue;
+            }
+            let ind = line.replace(trimmed, '').length;
+            if (ind < 2 || !(Number.isInteger(ind % indent) || Number.isInteger(indent % ind))) {
+                errors.push(createDiagError('Inconsistent indentation', getRange(x, line, trimmed)));
+            }
+            if (indent == 0)
+                indent = ind;
+            //test match line
+            if (trimmed.startsWith("match")) {
+                var regexs = trimmed.replace("match ", "").split(" ");
+                for (let r = 0; r < regexs.length - 1; r++) {
+                    let regex = regexs[r];
+                    if (regex.startsWith("/")) {
+                        try {
+                            new RegExp(regex);
+                        }
+                        catch {
+                            errors.push(createDiagError('Invalid regular expression', getRange(x, line, regex)));
+                        }
+                    }
+                    if (!(regex.startsWith("'") || variables.includes(regex))) {
+                        errors.push(createDiagError('Undefined variable: "' + regex + '"', getRange(x, line, regex)));
+                    }
+                }
+                continue;
+            }
+            if (trimmed.length > 0) {
+                errors.push(createDiagError('Invalid statement', getRange(x, line, line.trim())));
+            }
         }
-    }
-    else {
-        collection.clear();
+        collection.set(document.uri, errors);
     }
 }
 function deactivate() { }

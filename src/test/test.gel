@@ -1,7 +1,9 @@
 define nows /\S*/
 
-grammar input:
+grammar input(default):
     match nows:
         do.return()
     match ws nows:
-        asdfklj
+        do.fail()
+    match nows:
+      do.return()

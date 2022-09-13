@@ -15,6 +15,9 @@
 			"include": "#language"
 		},
 		{
+			"include": "#variables"
+		},
+		{
 			"include": "#input"
 		},
 		{
