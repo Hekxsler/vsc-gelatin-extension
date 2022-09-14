@@ -1,9 +1,19 @@
 define nows /\S*/
+define invälid /(test|me)/
 
-grammar input(default):
+
+grammar user(fail):
+    skip /#.*?[\r\n]+/
+    match 'foo' '[0-9]' /[\r\n]/
+        | 'bar' /[a-z]/ /[\r\n]/
+        | "foobar" /[A-Z]/ /[\r\n]/:
+        do.say('Match was: $1!')
+    when 'User:':
+        out.fail()
+
+grammar input(user):
     match nows:
-        do.return()
-    match ws nows:
-        do.fail()
-    match nows:
-      do.return()
+        out.create('parent/child?name="test"', 'hello world')
+    match /[a-z]/ ws nows:
+      do.fail()
+    
