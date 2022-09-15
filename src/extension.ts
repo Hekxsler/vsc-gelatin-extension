@@ -1,17 +1,10 @@
 import * as vscode from 'vscode';
 import * as diag from './diag';
+import * as completion from './completion';
 import * as help from './help';
 
 export const dofunctions = ["fail", "next", "return", "say", "skip"]
 export const outfunctions = ["add", "add_attribute", "clear_queue", "create", "enter", "enqueue_after", "enqueue_before", "enqueue_on_add", "open", "replace", "set_root_name"]
-
-function createCompletionItems(list: Array<string>): Array<vscode.CompletionItem> {
-  let array: vscode.CompletionItem[] = [];
-  list.forEach(e => {
-    array.push(new vscode.CompletionItem(e, vscode.CompletionItemKind.Method));
-  })
-  return array;
-}
 
 export function activate(ctx: vscode.ExtensionContext) {
   const collection = vscode.languages.createDiagnosticCollection('go');
@@ -39,10 +32,10 @@ export function activate(ctx: vscode.ExtensionContext) {
       provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
         const linePrefix = document.lineAt(position).text.substr(0, position.character);
         if (linePrefix.endsWith('do.')) {
-          return createCompletionItems(dofunctions);
+          return completion.createCompletionItems(dofunctions);
         }
         if (linePrefix.endsWith('out.')) {
-          return createCompletionItems(outfunctions);
+          return completion.createCompletionItems(outfunctions);
         }
         return undefined;
       }
