@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as diag from './diag';
+import * as help from './help';
 
 export const dofunctions = ["fail", "next", "return", "say", "skip"]
 export const outfunctions = ["add", "add_attribute", "clear_queue", "create", "enter", "enqueue_after", "enqueue_before", "enqueue_on_add", "open", "replace", "set_root_name"]

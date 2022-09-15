@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 import * as main from './extension';
 
+const varname = /^[a-z0-9_]+$/
+const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
+const string = /^(?<x>'|").*\k<x>$/
+
+
 function createDiagError(message: string, range: vscode.Range): {range:vscode.Range, message:string, severity:vscode.DiagnosticSeverity} {
   return {
     message: message,
@@ -9,16 +14,23 @@ function createDiagError(message: string, range: vscode.Range): {range:vscode.Ra
   };
 }
 
+function argAmountDiagError(should: number, has: number, range: vscode.Range) {
+  if(should > has) return createDiagError('Too many arguments. Expected '+should+' but got '+has, range);
+  return createDiagError('Missing argument(s). Expected '+should+' but got '+has, range);
+}
+
+
 function getRange(y: number, line: string, string: string): vscode.Range {
   let index = line.indexOf(string)
   return new vscode.Range(new vscode.Position(y, index), new vscode.Position(y, index+string.length));
 }
 
+
 function testRegex(regex: string): boolean {
   try{
     new RegExp(regex);
     regex.split("").forEach((e: string, i: number) => {
-      if(e=="(" && !(regex[i-1] == "\\" || regex.slice(i, i+2) == "?:")){
+      if(e == "(" && !(regex[i-1] == "\\" || regex.slice(i, i+2) == "?:")){
         return false;
       }
     });
@@ -29,14 +41,97 @@ function testRegex(regex: string): boolean {
 }
 
 
+function testArgs(path: string, str: string, regex: string, x: number, line: string){
+  let errors = [];
+  if(path && !xmlpath.test(path)){
+    errors.push(createDiagError('Invalid xml path.', getRange(x, line, path)));
+  }
+  if(str && !string.test(str)){
+    errors.push(createDiagError('Value must be a string.', getRange(x, line, str)));
+  }
+  if(regex && !testRegex(regex)){
+    errors.push(createDiagError('Invalid regular expression: '+regex, getRange(x, line, regex)));
+  }
+  return errors;
+}
+
+
+function diagOutFunction(func: string, args: string[], x: number, line: string) {
+  let errors = [];
+  let path = "";
+  let str = "";
+  let regex = "";
+  let minargs = 0;
+  let maxargs = 0;
+
+  switch(func) {
+    case "create":
+    case "add":
+    case "open":
+    case "replace":
+    case "enter":
+      path = args[0].slice(1, -1)
+      str = args[1]
+      minargs = 1
+      maxargs = 2
+      break
+    case "add_attribute":
+      path = args[0].slice(1, -1)
+      str = args[2]
+      minargs = 3
+      maxargs = 3
+      if(args.length == minargs && !varname.test(args[1])){
+        errors.push(createDiagError('Invalid name.', getRange(x, line, args[1])));
+      }
+      break
+    case "enqueue_after":
+    case "enqueue_before":
+    case "enqueue_on_add":
+      regex = args[0]
+      path = args[1].slice(1, -1)
+      str = args[2]
+      minargs = 2
+      maxargs = 3
+      break
+    case "set_root_name":
+      str = args[0]
+      minargs = 1
+      maxargs = 1
+  }
+  
+  errors.push(argAmountDiagError(minargs, args.length, getRange(x, line, args[maxargs-1])))
+  errors.push(argAmountDiagError(maxargs, args.length, getRange(x, line, func)))
+  errors.concat(testArgs(path, str, regex, x, line))
+  return errors;
+}
+
+
+function diagDoFunction(func: string, args: string[], x: number, line: string) {
+  let errors = [];
+  let str = "";
+  let minargs = 0;
+  let maxargs = 0;
+
+  switch(func) {
+    case "say":
+    case "fail":
+      minargs = 1
+      maxargs = 1
+      str = args[0]
+  }
+  
+  errors.push(argAmountDiagError(minargs, args.length, getRange(x, line, args[maxargs-1])))
+  errors.push(argAmountDiagError(maxargs, args.length, getRange(x, line, func)))
+  errors.concat(testArgs("", str, "", x, line))
+  return errors;
+}
+
+
 export function updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
   collection.clear()
   const functions = /^(do|out)/;
   const statements = /^(match|imatch|when|skip|\|)/;
   const colon = /:$/
-  const varname = /^[a-z0-9_]+$/
-  const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
-  const string = /^(?<x>'|").*\k<x>$/
   let errors: vscode.Diagnostic[] = [];
   let variables: string[] = [];
   let grammars: string[] = [];
@@ -111,34 +206,20 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
     if(functions.test(trimmed)){
       let statement = trimmed.split(".");
       let func = statement[1].split("(")
+      let args: string[] = [];
+      if(func.length > 1) args = func[1].slice(0, -1).split(", ");
       if(statement[0] == "do"){
         if(!main.dofunctions.includes(func[0])){
           errors.push(createDiagError('Invalid function. "do" has no function "'+func[0]+'"', getRange(x, line, line.trim())));
+        }else{
+          errors.concat(diagDoFunction(func[0], args, x, line))
         }
       }
       if(statement[0] == "out"){
         if(!main.outfunctions.includes(func[0])){
           errors.push(createDiagError('Invalid function. "out" has no function "'+func[0]+'"', getRange(x, line, line.trim())));
-        }
-        let args = func[1].slice(0, -1).split(", ")
-        switch(func[0]) {
-          case "create":
-          case "add":
-          case "open":
-          case "replace":
-          case "enter":
-            if(!xmlpath.test(args[0].slice(1, -1))){
-              errors.push(createDiagError('Invalid xml path.', getRange(x, line, args[0])));
-            }
-            if(args.length > 1 && !string.test(args[1])){
-              vscode.window.showInformationMessage(args[1])
-              errors.push(createDiagError('Value must be a string.', getRange(x, line, args[1])));
-            }
-            if(args.length > 2){
-              errors.push(createDiagError('Too many arguments. Expected 2 but got '+args.length, getRange(x, line, func[1].split(args[1])[1])));
-            }
-            break
-          case "":
+        }else{
+          errors.concat(diagOutFunction(func[0], args, x, line))
         }
       }
       continue
