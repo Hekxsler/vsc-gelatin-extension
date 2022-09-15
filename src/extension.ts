@@ -13,39 +13,43 @@ function createCompletionItems(list: Array<string>): Array<vscode.CompletionItem
 }
 
 export function activate(ctx: vscode.ExtensionContext) {
-  let disposables: vscode.Disposable[] = [];
   const collection = vscode.languages.createDiagnosticCollection('go');
-	
+    
   if (vscode.window.activeTextEditor) {
-		diag.updateDiagnostics(vscode.window.activeTextEditor.document, collection);
-	}
-	
-  vscode.window.onDidChangeActiveTextEditor(editor => {
-		if (editor) {
-			diag.updateDiagnostics(editor.document, collection);
-      vscode.window.showInformationMessage("chcek")
-		}
-	},undefined,disposables);
+    diag.updateDiagnostics(vscode.window.activeTextEditor.document, collection);
+  }
+  
+  let listener = vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor) {
+      diag.updateDiagnostics(editor.document, collection);
+    }
+  });
+  ctx.subscriptions.push(listener)
+
+  let listener2 = vscode.workspace.onDidChangeTextDocument(editor => {
+    if (editor) {
+      diag.updateDiagnostics(editor.document, collection);
+    }
+  });
+  ctx.subscriptions.push(listener2)
 
   const provider = vscode.languages.registerCompletionItemProvider(
-		'gelatin',
-		{
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-				const linePrefix = document.lineAt(position).text.substr(0, position.character);
-				if (linePrefix.endsWith('do.')) {
-					return createCompletionItems(dofunctions);
-				}
+    'gelatin', {
+      provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+        const linePrefix = document.lineAt(position).text.substr(0, position.character);
+        if (linePrefix.endsWith('do.')) {
+          return createCompletionItems(dofunctions);
+        }
         if (linePrefix.endsWith('out.')) {
-					return createCompletionItems(outfunctions);
-				}
-				return undefined;
-			}
-		},
-		'.' // triggered whenever a '.' is being typed
-	);
+          return createCompletionItems(outfunctions);
+        }
+        return undefined;
+      }
+    },
+    '.' // triggered whenever a '.' is being typed
+  );
+  ctx.subscriptions.push(provider)
 
-  disposables.push(collection, provider)
-  ctx.subscriptions.concat(disposables);
 }
 
 export function deactivate() {}

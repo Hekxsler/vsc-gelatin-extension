@@ -13,17 +13,22 @@ function createCompletionItems(list) {
     return array;
 }
 function activate(ctx) {
-    let disposables = [];
     const collection = vscode.languages.createDiagnosticCollection('go');
     if (vscode.window.activeTextEditor) {
         diag.updateDiagnostics(vscode.window.activeTextEditor.document, collection);
     }
-    vscode.window.onDidChangeActiveTextEditor(editor => {
+    let listener = vscode.window.onDidChangeActiveTextEditor(editor => {
         if (editor) {
             diag.updateDiagnostics(editor.document, collection);
-            vscode.window.showInformationMessage("chcek");
         }
-    }, undefined, disposables);
+    });
+    ctx.subscriptions.push(listener);
+    let listener2 = vscode.workspace.onDidChangeTextDocument(editor => {
+        if (editor) {
+            diag.updateDiagnostics(editor.document, collection);
+        }
+    });
+    ctx.subscriptions.push(listener2);
     const provider = vscode.languages.registerCompletionItemProvider('gelatin', {
         provideCompletionItems(document, position) {
             const linePrefix = document.lineAt(position).text.substr(0, position.character);
@@ -37,8 +42,7 @@ function activate(ctx) {
         }
     }, '.' // triggered whenever a '.' is being typed
     );
-    disposables.push(collection, provider);
-    ctx.subscriptions.concat(disposables);
+    ctx.subscriptions.push(provider);
 }
 exports.activate = activate;
 function deactivate() { }

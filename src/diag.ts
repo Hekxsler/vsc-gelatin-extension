@@ -31,21 +31,23 @@ function testRegex(regex: string): boolean {
 
 export function updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
   collection.clear()
-  const functions = new RegExp('^(do|out)');
-  const statements = new RegExp('^(match |imatch |when |skip |\| )');
-  const colon = new RegExp(':$')
-  const varname = new RegExp('^[a-z0-9_]+$')
+  const functions = /^(do|out)/;
+  const statements = /^(match|imatch|when|skip|\|)/;
+  const colon = /:$/
+  const varname = /^[a-z0-9_]+$/
+  const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
+  const string = /^(?<x>'|").*\k<x>$/
   let errors: vscode.Diagnostic[] = [];
   let variables: string[] = [];
   let grammars: string[] = [];
   let indent: number = 0;
   
   for(let x = 0; x < document.lineCount-1; x++){
-    let line = document.lineAt(x).text;
+    const line = document.lineAt(x).text;
     
     //test define line
     if(line.startsWith("define")){
-      var define = line.split(" ")
+      let define = line.split(" ")
       let name = define[1];
       let regex = define[2];
       variables.push(name);
@@ -55,13 +57,12 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
       if(!testRegex(regex)){
         errors.push(createDiagError('Invalid regular expression: '+regex, getRange(x, line, regex)));
       }
-      vscode.window.showInformationMessage(x+": "+define)
       continue
     }
 
     //test grammar line
     if(line.startsWith("grammar")){
-      var grammar = line.replace("grammar ", "").replace(colon, "").split("(")
+      let grammar = line.replace("grammar ", "").replace(colon, "").split("(")
       let name = grammar[0];
       if(grammar.length > 1){
         let parent = grammar[1].slice(0, -1);
@@ -76,7 +77,7 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
       continue
     }
 
-    let trimmed = line.trimStart()
+    const trimmed = line.trimStart()
     if(line.length == trimmed.length){
       continue
     }
@@ -91,10 +92,10 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
 
     //test statement line
     if(statements.test(trimmed)){
-      var regexs = trimmed.replace(colon, "").split(" ");
+      let regexs = trimmed.replace(colon, "").split(" ");
       for(let r = 1; r < regexs.length-1; r++){
         let regex = regexs[r];
-        let except = new RegExp('^(\/|"|\')')
+        let except = /^(\/|"|')/
         if(!(except.test(regex) || variables.includes(regex))){
           errors.push(createDiagError('Undefined variable: "'+regex+'"', getRange(x, line, regex)));
         }else{
@@ -108,16 +109,36 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
 
     //test function line
     if(functions.test(trimmed)){
-      var args = trimmed.split(".");
-      let attr = args[1].split("(")[0]
-      if(args[0] == "do"){
-        if(!main.dofunctions.includes(attr)){
-          errors.push(createDiagError('Invalid function. "do" has no attribute "'+args[1]+'"', getRange(x, line, line.trim())));
+      let statement = trimmed.split(".");
+      let func = statement[1].split("(")
+      if(statement[0] == "do"){
+        if(!main.dofunctions.includes(func[0])){
+          errors.push(createDiagError('Invalid function. "do" has no function "'+func[0]+'"', getRange(x, line, line.trim())));
         }
       }
-      if(args[0] == "out"){
-        if(!main.outfunctions.includes(attr)){
-          errors.push(createDiagError('Invalid function. "out" has no attribute "'+args[1]+'"', getRange(x, line, line.trim())));
+      if(statement[0] == "out"){
+        if(!main.outfunctions.includes(func[0])){
+          errors.push(createDiagError('Invalid function. "out" has no function "'+func[0]+'"', getRange(x, line, line.trim())));
+        }
+        let args = func[1].slice(0, -1).split(", ")
+        switch(func[0]) {
+          case "create":
+          case "add":
+          case "open":
+          case "replace":
+          case "enter":
+            if(!xmlpath.test(args[0].slice(1, -1))){
+              errors.push(createDiagError('Invalid xml path.', getRange(x, line, args[0])));
+            }
+            if(args.length > 1 && !string.test(args[1])){
+              vscode.window.showInformationMessage(args[1])
+              errors.push(createDiagError('Value must be a string.', getRange(x, line, args[1])));
+            }
+            if(args.length > 2){
+              errors.push(createDiagError('Too many arguments. Expected 2 but got '+args.length, getRange(x, line, func[1].split(args[1])[1])));
+            }
+            break
+          case "":
         }
       }
       continue
