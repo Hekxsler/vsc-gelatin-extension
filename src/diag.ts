@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as main from './extension';
 
+export let variables: {[name: string]: string} = {};
+
 const varname = /^[a-z0-9_]+$/
 const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
 const string = /^(?<x>'|").*\k<x>$/
@@ -133,7 +135,6 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
   const statements = /^(match|imatch|when|skip|\|)/;
   const colon = /:$/
   let errors: vscode.Diagnostic[] = [];
-  let variables: string[] = [];
   let grammars: string[] = [];
   let indent: number = 0;
   
@@ -145,13 +146,13 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
       let define = line.split(" ")
       let name = define[1];
       let regex = define[2];
-      variables.push(name);
       if(!varname.test(name)){
         errors.push(createDiagError('Invalid variable name: "'+name+'"', getRange(x, line, name)));
       }
       if(!testRegex(regex)){
         errors.push(createDiagError('Invalid regular expression: '+regex, getRange(x, line, regex)));
       }
+      variables[name] = regex
       continue
     }
 
@@ -191,7 +192,7 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
       for(let r = 1; r < regexs.length-1; r++){
         let regex = regexs[r];
         let except = /^(\/|"|')/
-        if(!(except.test(regex) || variables.includes(regex))){
+        if(!(except.test(regex) || variables[regex])){
           errors.push(createDiagError('Undefined variable: "'+regex+'"', getRange(x, line, regex)));
         }else{
           if(!testRegex(regex)){

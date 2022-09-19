@@ -15,4 +15,5 @@ grammar input(user):
     match nows:
         out.create('parent/child?name="test"', 'hello world', toomuch)
     match /[a-z]/ ws nows:
-      do.fail()
+        do.fail()
+        do.say()

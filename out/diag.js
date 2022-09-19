@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateDiagnostics = void 0;
+exports.updateDiagnostics = exports.variables = void 0;
 const vscode = require("vscode");
 const main = require("./extension");
+exports.variables = {};
 const varname = /^[a-z0-9_]+$/;
 const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
 const string = /^(?<x>'|").*\k<x>$/;
@@ -118,7 +119,6 @@ function updateDiagnostics(document, collection) {
     const statements = /^(match|imatch|when|skip|\|)/;
     const colon = /:$/;
     let errors = [];
-    let variables = [];
     let grammars = [];
     let indent = 0;
     for (let x = 0; x < document.lineCount - 1; x++) {
@@ -128,13 +128,13 @@ function updateDiagnostics(document, collection) {
             let define = line.split(" ");
             let name = define[1];
             let regex = define[2];
-            variables.push(name);
             if (!varname.test(name)) {
                 errors.push(createDiagError('Invalid variable name: "' + name + '"', getRange(x, line, name)));
             }
             if (!testRegex(regex)) {
                 errors.push(createDiagError('Invalid regular expression: ' + regex, getRange(x, line, regex)));
             }
+            exports.variables[name] = regex;
             continue;
         }
         //test grammar line
@@ -170,7 +170,7 @@ function updateDiagnostics(document, collection) {
             for (let r = 1; r < regexs.length - 1; r++) {
                 let regex = regexs[r];
                 let except = /^(\/|"|')/;
-                if (!(except.test(regex) || variables.includes(regex))) {
+                if (!(except.test(regex) || exports.variables[regex])) {
                     errors.push(createDiagError('Undefined variable: "' + regex + '"', getRange(x, line, regex)));
                 }
                 else {
