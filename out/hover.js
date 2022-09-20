@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HoverProvider = void 0;
 const vscode = require("vscode");
-const docstrings = require("./docstring.json");
-const params = require("./params.json");
+const docstringjson = require("./docstring.json");
+const paramjson = require("./params.json");
+const docstrings = docstringjson;
+const params = paramjson;
 class HoverProvider {
     provideHover(document, position, token) {
         let range = document.getWordRangeAtPosition(position, /[a-zA-Z0-9]+/);

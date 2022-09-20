@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import * as diag from './diag';
-import * as docstrings from './docstring.json';
-import * as params from './params.json';
+import * as docstringjson from './docstring.json';
+import * as paramjson from './params.json';
 
+const docstrings: {[func: string]: {[arg: string]: string}} = docstringjson
+const params: {[func: string]: {[arg: string]: {[key: string]: string}}} = paramjson
 
 export class HoverProvider implements vscode.HoverProvider {
     public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {

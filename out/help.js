@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignatureProvider = void 0;
 const vscode = require("vscode");
-const docstrings = require("./docstring.json");
-const params = require("./params.json");
+const docstringjson = require("./docstring.json");
+const paramjson = require("./params.json");
+const docstrings = docstringjson;
+const params = paramjson;
 class SignatureProvider {
     provideSignatureHelp(document, position, token) {
         let signature = new vscode.SignatureHelp();

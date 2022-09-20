@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
-import * as docstrings from './docstring.json';
-import * as params from './params.json';
+import * as docstringjson from './docstring.json';
+import * as paramjson from './params.json';
+
+const docstrings: {[func: string]: {[arg: string]: string}} = docstringjson
+const params: {[func: string]: {[arg: string]: {[key: string]: string}}} = paramjson
 
 export class SignatureProvider implements vscode.SignatureHelpProvider {
     public provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
