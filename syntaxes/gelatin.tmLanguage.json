@@ -77,7 +77,7 @@
 			"patterns": [
 				{
 					"name": "variable.language.gelatin",
-					"match": "\\b(out|do|define )\\b"
+					"match": "\\b(out|do|define)\\b"
 				}
 			]
 		},
@@ -122,6 +122,9 @@
 					"include": "#matchvar"
 				},
 				{
+					"include": "#doublestrings"
+				},
+				{
 					"include": "#xmlattribute"
 				}
 			]
@@ -156,48 +159,6 @@
 				},
 				{
 					"include": "#doublestrings"
-				},
-				{
-					"include": "#regex"
-				}
-			]
-		},
-		"grammar": {
-			"name": "meta.class.gelatin",
-			"begin": "grammar",
-			"end": "\n",
-			"patterns": [
-				{
-					"include": "#parentheses"
-				}
-			]
-		},
-		"match": {
-			"name": "meta.function.gelatin",
-			"begin": "\\b(imatch|match|when|skip)\\b",
-			"end": "\n",
-			"patterns": [
-				{
-					"include": "#keywords"
-				},
-				{
-					"include": "#variables"
-				},
-				{
-					"include": "#regex"
-				}
-			]
-		},
-		"define": {
-			"name": "meta.variable.gelatin",
-			"begin": "define",
-			"end": "\n",
-			"patterns": [
-				{
-					"include": "#language"
-				},
-				{
-					"include": "#variables"
 				},
 				{
 					"include": "#regex"

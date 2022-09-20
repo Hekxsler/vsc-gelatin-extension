@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HoverProvider = void 0;
 const vscode = require("vscode");
-const diag = require("./diag");
 const docstrings = require("./docstring.json");
 const params = require("./params.json");
 class HoverProvider {
@@ -22,9 +21,6 @@ class HoverProvider {
                 docstring = docstring + `\n\n\n_@param_ \`` + key + `\` - ` + value;
             }
             construct = "(method) " + func + "." + word + "(" + parameters.join(", ") + ")";
-        }
-        if (diag.variables[word]) {
-            construct = "(variable) " + word + " = " + diag.variables[word];
         }
         if (construct) {
             let hover = new vscode.Hover([{ language: 'js', value: construct }, new vscode.MarkdownString(docstring)]);

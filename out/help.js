@@ -19,7 +19,7 @@ class SignatureProvider {
                 label = label + key + ", ";
                 paraminfos.push(new vscode.ParameterInformation(key, value));
             }
-            label = label.slice(0, -2) + ")";
+            label = label.replace(/(, )$/, "") + ")";
             let info = new vscode.SignatureInformation(label, new vscode.MarkdownString(docstring));
             info.parameters = paraminfos;
             let activeParam = lineUntil.match(",")?.length;

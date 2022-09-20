@@ -3,6 +3,7 @@ import * as diag from './diag';
 import * as compl from './completion';
 import * as help from './help';
 import * as hov from './hover';
+import * as def from './definition';
 
 
 export const dofunctions = ["fail", "next", "return", "say", "skip"]
@@ -52,6 +53,12 @@ export function activate(ctx: vscode.ExtensionContext) {
     'gelatin', new hov.HoverProvider
   )
   ctx.subscriptions.push(hover)
+
+  //definitions
+  let definitions = vscode.languages.registerDefinitionProvider(
+    'gelatin', new def.DefinitionProvider
+  )
+  ctx.subscriptions.push(definitions)
 
 }
 

@@ -6,6 +6,7 @@ const diag = require("./diag");
 const compl = require("./completion");
 const help = require("./help");
 const hov = require("./hover");
+const def = require("./definition");
 exports.dofunctions = ["fail", "next", "return", "say", "skip"];
 exports.outfunctions = ["add", "add_attribute", "clear_queue", "create", "enter", "enqueue_after", "enqueue_before", "enqueue_on_add", "open", "replace", "set_root_name"];
 function activate(ctx) {
@@ -41,6 +42,9 @@ function activate(ctx) {
     //hover
     let hover = vscode.languages.registerHoverProvider('gelatin', new hov.HoverProvider);
     ctx.subscriptions.push(hover);
+    //definitions
+    let definitions = vscode.languages.registerDefinitionProvider('gelatin', new def.DefinitionProvider);
+    ctx.subscriptions.push(definitions);
 }
 exports.activate = activate;
 function deactivate() { }

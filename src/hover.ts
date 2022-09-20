@@ -23,10 +23,6 @@ export class HoverProvider implements vscode.HoverProvider {
             }
             construct = "(method) "+func+"."+word+"("+parameters.join(", ")+")"
         }
-
-        if(diag.variables[word]){
-            construct = "(variable) "+word+" = "+diag.variables[word]
-        }
         
         if(construct){
             let hover = new vscode.Hover([{language: 'js', value: construct}, new vscode.MarkdownString(docstring)]);

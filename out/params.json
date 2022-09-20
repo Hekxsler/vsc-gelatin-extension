@@ -1,7 +1,7 @@
 {
     "do": {
-        "say": { "stdout": "A string to print." },
-        "fail": { "stdout": "A string to print." }
+        "say": { "stdout: string": "A string to print." },
+        "fail": { "stdout: string": "A string to print." }
     },
     "out": {
         "create": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
