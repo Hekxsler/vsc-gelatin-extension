@@ -3,7 +3,8 @@
   "displayName": "Gelatin",
   "description": "Gelatin linting and highlighting",
   "version": "0.0.1",
-  "publisher": "hekxsler",
+  "publisher": "Hekxsler",
+  "author": {"name": "Hekxsler"},
   "engines": {
     "vscode": "^1.71.0"
   },
@@ -14,13 +15,27 @@
   "activationEvents": [
     "onLanguage:gelatin"
   ],
+  "license": "MIT",
+  "homepage": "https://github.com/Hekxsler/vsc-gelatin-extension",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/Hekxsler/vsc-gelatin-extension"
+  },
+  "bugs": {
+      "url": "https://github.com/Hekxsler/vsc-gelatin-extension/issues"
+  },
+  "icon": "icons/gelatin.png",
   "main": "./out/extension.js",
   "contributes": {
     "languages": [{
       "id": "gelatin",
       "aliases": ["Gelatin", "gelatin"],
       "extensions": [".gel"],
-      "configuration": "./language-configuration.json"
+      "configuration": "./language-configuration.json",
+      "icon": {
+        "light": "./icons/gelatin.png",
+        "dark": "./icons/gelatin.png"
+      }
     }],
     "grammars": [{
       "language": "gelatin",
