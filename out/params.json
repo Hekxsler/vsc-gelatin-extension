@@ -4,15 +4,15 @@
         "fail": { "stdout": "A string to print." }
     },
     "out": {
-        "create": { "path": "A XML-Path to the leaf node.", "value": "Optional string to set as data." },
-        "add": { "path": "A XML-Path to the leaf node.", "value": "Optional string to set as data." },
-        "replace": { "path": "A XML-Path to the leaf node.", "value": "Optional string to set as data." },
-        "open": { "path": "A XML-Path to the leaf node.", "value": "Optional string to set as data." },
-        "enter": { "path": "A XML-Path to the leaf node.", "value": "Optional string to set as data." },
-        "add_attribute": { "path": "A XML-Path to the leaf node.", "name": "Name of the attribute.", "value": "String to set as data." },
-        "enqueue_after": { "regexp": "A regular expression to match.", "path": "A XML-Path to the leaf node.", "value": "String to set as data." },
-        "enqueue_before": { "regexp": "A regular expression to match.", "path": "A XML-Path to the leaf node.", "value": "String to set as data." },
-        "enqueue_on_add": { "regexp": "A regular expression to match.", "path": "A XML-Path to the leaf node.", "value": "String to set as data." },
-        "set_root_name": { "value": "A string to set as the name of the root tag." }
+        "create": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "add": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "replace": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "open": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "enter": { "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "add_attribute": { "path: string": "A XML-Path to the leaf node.", "name: string": "Name of the attribute.", "value: string": "String to set as data." },
+        "enqueue_after": { "match: regexp": "A regular expression to match.", "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "enqueue_before": { "match: regexp": "A regular expression to match.", "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "enqueue_on_add": { "match: regexp": "A regular expression to match.", "path: string": "A XML-Path to the leaf node.", "value?: string": "Optional string to set as data." },
+        "set_root_name": { "name: string": "A string to set as the name of the root tag." }
     }
 }

@@ -53,7 +53,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.gelatin",
-					"match": "\\b(imatch|match|when|skip )\\b"
+					"match": "\\b(imatch|match|when|skip)\\b"
 				}
 			]
 		},
@@ -61,7 +61,7 @@
 			"patterns": [
 				{
 					"name": "entity.name.type.gelatin",
-					"match": "\\b(grammar )\\b"
+					"match": "\\b(grammar)\\b"
 				}
 			]
 		},
@@ -109,7 +109,7 @@
 			"patterns": [
 				{
 					"name": "variable.other.matchvar",
-					"match": "$\\d+"
+					"match": "\\$\\d+"
 				}
 			]
 		},
@@ -136,15 +136,6 @@
 				}
 			]
 		},
-		"parentheses": {
-			"begin": "\\(",
-			"end": "\\)",
-			"patterns": [
-				{
-					"include": "#strings"
-				}
-			]
-		},
 		"regex": {
 			"name": "string.regexp.gelatin",
 			"begin": "/",
@@ -153,6 +144,21 @@
 				{
 					"name": "constant.character.escape.gelatin",
 					"match": "\\\\."
+				}
+			]
+		},
+		"parentheses": {
+			"begin": "\\(",
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#strings"
+				},
+				{
+					"include": "#doublestrings"
+				},
+				{
+					"include": "#regex"
 				}
 			]
 		},
@@ -168,7 +174,7 @@
 		},
 		"match": {
 			"name": "meta.function.gelatin",
-			"begin": "\\b(imatch|match|when|skip )\\b",
+			"begin": "\\b(imatch|match|when|skip)\\b",
 			"end": "\n",
 			"patterns": [
 				{

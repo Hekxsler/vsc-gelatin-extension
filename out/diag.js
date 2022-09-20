@@ -167,7 +167,7 @@ function updateDiagnostics(document, collection) {
         //test statement line
         if (statements.test(trimmed)) {
             let regexs = trimmed.replace(colon, "").split(" ");
-            for (let r = 1; r < regexs.length - 1; r++) {
+            for (let r = 1; r < regexs.length; r++) {
                 let regex = regexs[r];
                 let except = /^(\/|"|')/;
                 if (!(except.test(regex) || exports.variables[regex])) {
@@ -176,6 +176,13 @@ function updateDiagnostics(document, collection) {
                 else {
                     if (!testRegex(regex)) {
                         errors.push(createDiagError('Invalid regular expression: ' + regex, getRange(x, line, regex)));
+                    }
+                    else {
+                        for (let key in exports.variables) {
+                            if (exports.variables[key] == regex) {
+                                errors.push(new vscode.Diagnostic(getRange(x, line, regex), "Regular expression is already defined as \"" + key + "\"", vscode.DiagnosticSeverity.Warning));
+                            }
+                        }
                     }
                 }
             }

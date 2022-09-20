@@ -3,6 +3,7 @@ import * as diag from './diag';
 import * as docstrings from './docstring.json';
 import * as params from './params.json';
 
+
 export class HoverProvider implements vscode.HoverProvider {
     public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
         let range = document.getWordRangeAtPosition(position, /[a-zA-Z0-9]+/)
@@ -27,8 +28,11 @@ export class HoverProvider implements vscode.HoverProvider {
             construct = "(variable) "+word+" = "+diag.variables[word]
         }
         
-        let hover = new vscode.Hover([{language: 'js', value: construct}, new vscode.MarkdownString(docstring)]);
+        if(construct){
+            let hover = new vscode.Hover([{language: 'js', value: construct}, new vscode.MarkdownString(docstring)]);
+            return hover;
+        }
 
-        return hover;
+        return undefined;
     }
 }

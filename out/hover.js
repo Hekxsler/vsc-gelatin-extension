@@ -26,8 +26,11 @@ class HoverProvider {
         if (diag.variables[word]) {
             construct = "(variable) " + word + " = " + diag.variables[word];
         }
-        let hover = new vscode.Hover([{ language: 'js', value: construct }, new vscode.MarkdownString(docstring)]);
-        return hover;
+        if (construct) {
+            let hover = new vscode.Hover([{ language: 'js', value: construct }, new vscode.MarkdownString(docstring)]);
+            return hover;
+        }
+        return undefined;
     }
 }
 exports.HoverProvider = HoverProvider;

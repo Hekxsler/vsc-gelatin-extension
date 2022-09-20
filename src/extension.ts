@@ -16,22 +16,24 @@ export function activate(ctx: vscode.ExtensionContext) {
   }
 
   //diagnose
-  const listener = vscode.window.onDidChangeActiveTextEditor(editor => {
+  let listener = vscode.workspace.onDidChangeTextDocument(editor => {
     if (editor) {
       diag.updateDiagnostics(editor.document, collection);
     }
   });
+  ctx.subscriptions.push(listener)
 
   //helpProvider
-  const signature = vscode.languages.registerSignatureHelpProvider(
+  let signature = vscode.languages.registerSignatureHelpProvider(
     'gelatin', new help.SignatureProvider, '(', ','
   )
+  ctx.subscriptions.push(signature)
 
   //completion
-  const completion = vscode.languages.registerCompletionItemProvider(
+  let completion = vscode.languages.registerCompletionItemProvider(
     'gelatin', {
       provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-        const linePrefix = document.lineAt(position).text.substr(0, position.character);
+        const linePrefix = document.lineAt(position).text.slice(0, position.character);
         if (linePrefix.endsWith('do.')) {
           return compl.createCompletionItems(dofunctions);
         }
@@ -43,14 +45,14 @@ export function activate(ctx: vscode.ExtensionContext) {
     },
     '.' // triggered whenever a '.' is being typed
   );
+  ctx.subscriptions.push(completion)
 
   //hover
-  const hover = vscode.languages.registerHoverProvider(
+  let hover = vscode.languages.registerHoverProvider(
     'gelatin', new hov.HoverProvider
   )
-  
-  
-  ctx.subscriptions.push(listener, signature, completion, hover)
+  ctx.subscriptions.push(hover)
+
 }
 
 export function deactivate() {}

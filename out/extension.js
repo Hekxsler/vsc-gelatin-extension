@@ -14,17 +14,19 @@ function activate(ctx) {
         diag.updateDiagnostics(vscode.window.activeTextEditor.document, collection);
     }
     //diagnose
-    const listener = vscode.window.onDidChangeActiveTextEditor(editor => {
+    let listener = vscode.workspace.onDidChangeTextDocument(editor => {
         if (editor) {
             diag.updateDiagnostics(editor.document, collection);
         }
     });
+    ctx.subscriptions.push(listener);
     //helpProvider
-    const signature = vscode.languages.registerSignatureHelpProvider('gelatin', new help.SignatureProvider, '(', ',');
+    let signature = vscode.languages.registerSignatureHelpProvider('gelatin', new help.SignatureProvider, '(', ',');
+    ctx.subscriptions.push(signature);
     //completion
-    const completion = vscode.languages.registerCompletionItemProvider('gelatin', {
+    let completion = vscode.languages.registerCompletionItemProvider('gelatin', {
         provideCompletionItems(document, position) {
-            const linePrefix = document.lineAt(position).text.substr(0, position.character);
+            const linePrefix = document.lineAt(position).text.slice(0, position.character);
             if (linePrefix.endsWith('do.')) {
                 return compl.createCompletionItems(exports.dofunctions);
             }
@@ -35,9 +37,10 @@ function activate(ctx) {
         }
     }, '.' // triggered whenever a '.' is being typed
     );
+    ctx.subscriptions.push(completion);
     //hover
-    const hover = vscode.languages.registerHoverProvider('gelatin', new hov.HoverProvider);
-    ctx.subscriptions.push(listener, signature, completion, hover);
+    let hover = vscode.languages.registerHoverProvider('gelatin', new hov.HoverProvider);
+    ctx.subscriptions.push(hover);
 }
 exports.activate = activate;
 function deactivate() { }

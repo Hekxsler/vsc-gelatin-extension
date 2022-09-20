@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as main from './extension';
 
-export let variables: {[name: string]: string} = {};
+export var variables: {[name: string]: string} = {};
 
 const varname = /^[a-z0-9_]+$/
 const xmlpath = /^(\w+|\.)((\?|&)\w+="[^\/&\n]+)*(\/(\w+|\.)((\?|&)\w+="[^\/&\n]+)*)*$/;
@@ -189,7 +189,7 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
     //test statement line
     if(statements.test(trimmed)){
       let regexs = trimmed.replace(colon, "").split(" ");
-      for(let r = 1; r < regexs.length-1; r++){
+      for(let r = 1; r < regexs.length; r++){
         let regex = regexs[r];
         let except = /^(\/|"|')/
         if(!(except.test(regex) || variables[regex])){
@@ -197,6 +197,12 @@ export function updateDiagnostics(document: vscode.TextDocument, collection: vsc
         }else{
           if(!testRegex(regex)){
             errors.push(createDiagError('Invalid regular expression: '+regex, getRange(x, line, regex)));
+          }else{
+            for(let key in variables){
+              if(variables[key] == regex){
+                errors.push(new vscode.Diagnostic(getRange(x, line, regex), "Regular expression is already defined as \""+key+"\"", vscode.DiagnosticSeverity.Warning))
+              }
+            }
           }
         }
       }
