@@ -9,6 +9,7 @@ grammar user(fail):
         | 'bar' /[a-z]/ /[\r\n]/
         | "foobar" /[A-Z]/ /[\r\n]/:
         do.say('Match was: $1!')
+    match nows '"' /[^"\n]/ nl:
     when 'User:':
         out.fail()
 

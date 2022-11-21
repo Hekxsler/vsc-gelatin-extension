@@ -115,14 +115,11 @@
 		},
 		"strings": {
 			"name": "string.quoted.single.gelatin",
-			"begin": "'",
-			"end": "'",
+			"begin": "\\'",
+			"end": "\\'",
 			"patterns": [
 				{
 					"include": "#matchvar"
-				},
-				{
-					"include": "#doublestrings"
 				},
 				{
 					"include": "#xmlattribute"
@@ -131,8 +128,8 @@
 		},
 		"doublestrings": {
 			"name": "string.quoted.double.gelatin",
-			"begin": "\"",
-			"end": "\"",
+			"begin": "\\\"",
+			"end": "\\\"",
 			"patterns": [
 				{
 					"include": "#matchvar"
@@ -141,8 +138,8 @@
 		},
 		"regex": {
 			"name": "string.regexp.gelatin",
-			"begin": "/",
-			"end": "/",
+			"begin": "\\/",
+			"end": "\\/",
 			"patterns": [
 				{
 					"name": "constant.character.escape.gelatin",
